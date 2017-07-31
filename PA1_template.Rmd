@@ -5,21 +5,113 @@ output:
     keep_md: true
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-## Loading and preprocessing the data
-
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
+This assignment analyzes data from a personal activity monitoring device.  
+  
+The variables included in this dataset are:  
+- steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)  
+- date: The date on which the measurement was taken in YYYY-MM-DD format  
+- interval: Identifier for the 5-minute interval in which measurement was taken  
 
 
+```{r working directory, echo=FALSE}
+setwd("C:/Users/smythto/Documents/_Never Backup/Dropbox/Coursera/Reproducible Research/Project 1")
+```
+##Loading and preprocessing the data  
+Read the data from file:
+```{r load data}
+activityRaw <- read.csv("activity.csv", header = TRUE, na.strings = "NA")
+```
 
-## Are there differences in activity patterns between weekdays and weekends?
+Raw data dimensions and 10 sample records:
+```{r overview}
+dim(activityRaw)
+activityRaw[sample(nrow(activityRaw),10),]  
+
+```
+
+NA values for field "steps"" will be exluded from analysis as they represent a lack of a measurement (not necessarily the same a an observation of "0"):
+```{r na}
+
+activity <- subset(activityRaw, is.na(steps) == FALSE)   
+activityNa <- subset(activityRaw,  is.na(steps) == TRUE)
+numNaRecs <- nrow(activityNa)  
+`````
+
+Cleansed data dimensions:
+```{r overview of cleansed}
+dim(activity)
+```
+
+Aggregate clean data to get mean and sum of steps per day:
+```{r aggregate}
+library("plyr")
+sumByDay<- ddply(activity,.(date),summarize, sumSteps = sum(steps))
+```
+##What is mean total number of steps taken per day?  
+```{r mean of steps}
+hist(sumByDay$sumSteps, main = "Frequency of total steps taken per day", xlab ="Total steps taken per day", ylab = "Number of days")  
+stepsMedian <- round(median(sumByDay$sumStep), 1)
+stepsMean <- round(mean(sumByDay$sumStep),1)
+abline(v=stepsMedian,lty = 2, lwd=2,col = "red")  
+abline(v=stepsMean,lty = 3,lwd=1,col = "blue")  
+legend("topright",c(paste0("median (", round(stepsMedian,1) ,")" ) ,paste0("mean (" , round (stepsMean,1) , ")")),lwd=2,col = c("red","blue"))
+```
+
+Aggregate clean data to get average steps per interval:  
+```{r aggregate for intervals}
+avgByInt<- ddply(activity,.(interval),summarize, avgSteps = mean(steps))
+```
+
+##What is the average daily activity pattern?  
+``` {r plot daily}
+
+plot(avgByInt$interval, avgByInt$avgSteps, type = "l", main = "Average Daily Activity Pattern", xlab ="5 minute time interval", ylab = "Average steps taken (across all days)", col = "blue")
+maxInt <- avgByInt[avgByInt$avgSteps == max(avgByInt$avgSteps),c("interval")]
+maxSteps <-round(max(avgByInt$avgSteps),2)
+```
+**Interval with average maximum steps**  
+The maxinum number of steps (`r maxSteps`) occurred in interval `r maxInt`.  
+
+##Imputing missing values     
+As noted above, NA values were observed in the data.  `r numNaRecs` records were observed with missing values in the original activity monitoring data.  
+
+**Implement impute strategy, create new data set with imputed steps**   
+```{r impute}
+library("mice")
+imputedData <- mice(activityRaw,m=5, maxit = 5, method = "pmm", seed = 50)
+##summary(imputedData)
+activityImputed <-  complete(imputedData, 2)
+
+sumByDayImputed<- ddply(activityImputed,.(date),summarize, sumSteps = sum(steps))
+```
+
+**Imputed data histogram**  
+``` {r impute histogram}
+
+hist(sumByDayImputed$sumSteps, main = "Frequency of total steps taken/day (with imputed missing values for steps)", xlab ="Total steps taken per day", ylab = "Number of days")  
+stepsMedianImputed <- round(median(sumByDayImputed$sumStep),1)
+stepsMeanImputed <- round(mean(sumByDayImputed$sumStep),1)
+abline(v=stepsMedianImputed,lty = 2, lwd=2,col = "red")  
+abline(v=stepsMeanImputed,lty = 3,lwd=1,col = "blue")  
+legend("topright",c(paste0("median (", round(stepsMedianImputed,1) ,")" ) ,paste0("mean (" , round (stepsMeanImputed,1) , ")")),lwd=2,col = c("red","blue"))
+```
+
+
+**Impact of imputing data**   
+Comparing this chart with imputed steps to the chart above where missing steps were removed (in requirement 3), it is observed that the mean changed from `r format(stepsMean, digits = 1)` to `r format(stepsMeanImputed, digits = 1)` and the median change from `r format(stepsMedian, digits = 1)` to `r format(stepsMedianImputed, digits = 1)`.
+
+##Are there differences in activity patterns between weekdays and weekends?  
+```{r Weekday analysis}
+activityImputed$date = as.Date(activityImputed$date)
+activityImputed$DayOfWeek <- ifelse(weekdays(activityImputed$date) == "Saturday" | weekdays(activityImputed$date) == "Sunday", "Weekend","Weekday")
+
+avgByIntWD<- ddply(activityImputed,.(interval, DayOfWeek),summarize, avgSteps = mean(steps))
+
+library("lattice")
+xyplot(avgSteps ~interval | DayOfWeek, data = avgByIntWD, type = "l", layout=c(1,2), xlab = "Interval", ylab = "Number of Steps", main = "Average Daily Activity Pattern")
+```
+
