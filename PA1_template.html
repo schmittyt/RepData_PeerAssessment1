@@ -134,16 +134,16 @@ $(document).ready(function () {
 <pre><code>## [1] 17568     3</code></pre>
 <pre class="r"><code>activityRaw[sample(nrow(activityRaw),10),]  </code></pre>
 <pre><code>##       steps       date interval
-## 7787      0 2012-10-28       50
-## 6571     33 2012-10-23     1930
-## 16845     0 2012-11-28     1140
-## 7541      0 2012-10-27      420
-## 16103     0 2012-11-25     2150
-## 14053    24 2012-11-18     1900
-## 7889      0 2012-10-28      920
-## 7812      0 2012-10-28      255
-## 8438     81 2012-10-30      705
-## 13372     0 2012-11-16     1015</code></pre>
+## 15479     0 2012-11-23     1750
+## 1617     30 2012-10-06     1440
+## 2400    146 2012-10-09      755
+## 10683     0 2012-11-07      210
+## 993       0 2012-10-04     1040
+## 1939      0 2012-10-07     1730
+## 5690    135 2012-10-20     1805
+## 10902     0 2012-11-07     2025
+## 15238     0 2012-11-22     2145
+## 11747    NA 2012-11-10     1850</code></pre>
 <p>NA values for field “steps”&quot; will be exluded from analysis as they represent a lack of a measurement (not necessarily the same a an observation of “0”):</p>
 <pre class="r"><code>activity &lt;- subset(activityRaw, is.na(steps) == FALSE)   
 activityNa &lt;- subset(activityRaw,  is.na(steps) == TRUE)
