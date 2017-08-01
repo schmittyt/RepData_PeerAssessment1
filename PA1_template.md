@@ -34,16 +34,16 @@ activityRaw[sample(nrow(activityRaw),10),]
 
 ```
 ##       steps       date interval
-## 15479     0 2012-11-23     1750
-## 1617     30 2012-10-06     1440
-## 2400    146 2012-10-09      755
-## 10683     0 2012-11-07      210
-## 993       0 2012-10-04     1040
-## 1939      0 2012-10-07     1730
-## 5690    135 2012-10-20     1805
-## 10902     0 2012-11-07     2025
-## 15238     0 2012-11-22     2145
-## 11747    NA 2012-11-10     1850
+## 13942     0 2012-11-18      945
+## 3698      0 2012-10-13     2005
+## 7545      0 2012-10-27      440
+## 11880     0 2012-11-11      555
+## 3018      7 2012-10-11     1125
+## 7179      0 2012-10-25     2210
+## 4930      0 2012-10-18      245
+## 11032    50 2012-11-08      715
+## 16914   272 2012-11-28     1725
+## 3322     91 2012-10-12     1245
 ```
 
 NA values for field "steps"" will be exluded from analysis as they represent a lack of a measurement (not necessarily the same a an observation of "0"):
@@ -81,7 +81,7 @@ abline(v=stepsMean,lty = 3,lwd=1,col = "blue")
 legend("topright",c(paste0("median (", round(stepsMedian,1) ,")" ) ,paste0("mean (" , round (stepsMean,1) , ")")),lwd=2,col = c("red","blue"))
 ```
 
-![](PA1_template_files/figure-html/mean of steps-1.png)<!-- -->
+![](PA1_template_files/figure-html/mean_of_steps-1.png)<!-- -->
 
 Aggregate clean data to get average steps per interval:  
 
@@ -95,7 +95,7 @@ avgByInt<- ddply(activity,.(interval),summarize, avgSteps = mean(steps))
 plot(avgByInt$interval, avgByInt$avgSteps, type = "l", main = "Average Daily Activity Pattern", xlab ="5 minute time interval", ylab = "Average steps taken (across all days)", col = "blue")
 ```
 
-![](PA1_template_files/figure-html/plot daily-1.png)<!-- -->
+![](PA1_template_files/figure-html/plot_daily-1.png)<!-- -->
 
 ```r
 maxInt <- avgByInt[avgByInt$avgSteps == max(avgByInt$avgSteps),c("interval")]
@@ -162,7 +162,7 @@ abline(v=stepsMeanImputed,lty = 3,lwd=1,col = "blue")
 legend("topright",c(paste0("median (", round(stepsMedianImputed,1) ,")" ) ,paste0("mean (" , round (stepsMeanImputed,1) , ")")),lwd=2,col = c("red","blue"))
 ```
 
-![](PA1_template_files/figure-html/impute histogram-1.png)<!-- -->
+![](PA1_template_files/figure-html/impute_histogram-1.png)<!-- -->
 
 
 **Impact of imputing data**   
@@ -180,5 +180,5 @@ library("lattice")
 xyplot(avgSteps ~interval | DayOfWeek, data = avgByIntWD, type = "l", layout=c(1,2), xlab = "Interval", ylab = "Number of Steps", main = "Average Daily Activity Pattern")
 ```
 
-![](PA1_template_files/figure-html/Weekday analysis-1.png)<!-- -->
+![](PA1_template_files/figure-html/Weekday_analysis-1.png)<!-- -->
 
